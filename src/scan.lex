@@ -9,6 +9,9 @@ COMENTARIO  "/*"([^*]|("*"+[^*/]))*"*"+"/"
 FOR         [Ff][Oo][Rr]
 IF          [Ii][Ff]
 STRING      \"([^\\\"]|\\.)*\"|\'([^\\\']|\\.)*\'
+STRING2     \`(\\.|[^\\`])*\`
+DOLLARSIGN  "$"
+EXPR        {STRING}|{STRING2}|{DOLLARSIGN}"{"{ID}"}"
 MAIG        ">="
 MEIG        "<="
 IG          "=="
@@ -17,7 +20,6 @@ DIGIT       [0-9]
 LETTER      [A-Za-z]
 NUM         {DIGIT}+
 UNDERLINE   "_"
-DOLLARSIGN  "$"
 ID          ({LETTER}|{UNDERLINE}|{DOLLARSIGN})({LETTER}|{DIGIT}|{UNDERLINE})*
 INT         {NUM}
 FLOAT       ({NUM}"."{NUM}([eE][-+]?{NUM})?|{NUM}[Ee][-+]?{NUM})
@@ -32,15 +34,22 @@ INVALID_ID  ({LETTER}|{UNDERLINE}|{DOLLARSIGN})({LETTER}|{DIGIT}|{UNDERLINE})*{D
 {IF}         { lexema = yytext; return _IF; }
 {STRING}     { 
     lexema = yytext;
-    lexema.erase(0, 1);             // Remove the leading quote (")
-    lexema.erase(lexema.length() - 1); // Remove the trailing quote (")
+    lexema.erase(0, 1);
+    lexema.erase(lexema.length() - 1);
     return _STRING;
+}
+{STRING2}    { 
+    lexema = yytext;
+    lexema.erase(0, 1);
+    lexema.erase(lexema.length() - 1);
+    return _STRING2;
 }
 {MAIG}       { lexema = yytext; return _MAIG; }
 {MEIG}       { lexema = yytext; return _MEIG; }
 {IG}         { lexema = yytext; return _IG; }
 {DIF}        { lexema = yytext; return _DIF; }
 {ID}         { lexema = yytext; return _ID; }
+{EXPR}       { lexema = yytext; return _EXPR; }
 {INT}        { lexema = yytext; return _INT; }
 {FLOAT}      { lexema = yytext; return _FLOAT; }
 {INVALID_ID} {
